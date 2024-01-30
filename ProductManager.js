@@ -1,38 +1,75 @@
-// El modulo crypto permite trabajar cryptografia con nodejs
-import crypto from 'crypto';
+import { promises as fs } from 'fs'
 
-class ProductManager {
-  constructor() {
-    this.productos = [];
+export class ProductManager {
+  constructor(path) {
+    this.path = path;
   }
 
-  addProduct(producto) {
-
-    const existe = this.productos.some((prod) => prod.code === producto.code);
-    if (existe) {
-      console.log("El producto ya existe")
+  async addProduct(nuevoProducto) {
+    const productos = JSON.parse(await fs.readFile(this.path, "utf-8"))
+    if (nuevoProducto.code && nuevoProducto.id && nuevoProducto.title && nuevoProducto.description
+      && nuevoProducto.price && nuevoProducto.thumbnail && nuevoProducto.code && nuevoProducto.stock) {
+      const index = productos.findIndex(producto => producto.code === nuevoProducto.code)
+      console.log(index)
+      if (index === -1) {
+        productos.push(nuevoProducto)
+        console.log(productos)
+        await fs.writeFile(this.path, JSONsify(productos))
+        console.log("Producto creado correctamente");
+      } else {
+        console.log("El producto ya existe")
+      }
     } else {
-      producto.id = crypto.randomBytes(2).toString('hex');
-      this.productos.push(producto);
-      console.log("Producto agregado")
+      console.log("Ingrese un producto con las correspondientes propiedades")
     }
   }
 
-  getProducts() {
-    return this.productos;
+  async getProducts() {
+    const productos = JSON.parse(await fs.readFile(this.path, "utf-8"))
+    console.log(productos)
   }
 
-  getProductById(id) {
-    const producto = this.productos.find((prod) => prod.id === id);
-
+  async getProductById(id) {
+    const productos = JSON.parse(await fs.readFile(this.path, "utf-8"))
+    const producto = productos.find(producto => producto.id === id)
     if (producto) {
       console.log(producto)
     } else {
       console.error("Producto no encontrado", id);
     }
   }
+
+  async updateProduct(id, nuevoProducto) {
+    const productos = JSON.parse(await fs.readFile(this.path, "utf-8"))
+    const index = productos.findIndex(producto => producto.id === id)
+    if (index != -1) {
+      productos[index].stock = nuevoProducto.stock
+      productos[index].price = nuevoProducto.price
+      productos[index].title = nuevoProducto.title
+      productos[index].thumbnail = nuevoProducto.thumbnail
+      productos[index].description = nuevoProducto.description
+      productos[index].code = nuevoProducto.code
+      await fs.writeFile(this.path, JSON.stringify(productos))
+      console.log("Producto actualizado correctamente")
+    } else {
+      console.log("El producto no existe")
+    }
+  }
+
+  async deleteProduct(id) {
+    const productos = JSON.parse(await fs.readFile(this.path, "utf-8"))
+    const index = productos.findIndex(producto => producto.id === id)
+    if (index != -1) {
+      const productosFiltrados = productos.filter(producto => producto.id != id)
+      await fs.writeFile(this.path, JSON.stringify(productosFiltrados))
+      console.log("Producto eliminado correctamente")
+    } else {
+      console.log("Producto no existe")
+    }
+  }
 }
 
+/*
 const productoManager = new ProductManager();
 
 const verProducts = productoManager.getProducts();
@@ -68,3 +105,4 @@ const productoPorId = productoManager.getProducts()[0].id;
 
 const encontrarProducto = productoManager.getProductById(productoPorId);
 console.log(encontrarProducto);
+*/
