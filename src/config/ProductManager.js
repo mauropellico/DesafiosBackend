@@ -14,7 +14,7 @@ export class ProductManager {
       if (index === -1) {
         productos.push(nuevoProducto)
         console.log(productos)
-        await fs.writeFile(this.path, JSONsify(productos))
+        await fs.writeFile(this.path, JSON.stringify(productos))
         console.log("Producto creado correctamente");
       } else {
         console.log("El producto ya existe")
@@ -26,16 +26,17 @@ export class ProductManager {
 
   async getProducts() {
     const productos = JSON.parse(await fs.readFile(this.path, "utf-8"))
-    console.log(productos)
+    return productos;
   }
 
   async getProductById(id) {
     const productos = JSON.parse(await fs.readFile(this.path, "utf-8"))
     const producto = productos.find(producto => producto.id === id)
     if (producto) {
-      console.log(producto)
+      return producto
     } else {
       console.error("Producto no encontrado", id);
+      return "Producto no encontrado"
     }
   }
 
@@ -68,41 +69,3 @@ export class ProductManager {
     }
   }
 }
-
-/*
-const productoManager = new ProductManager();
-
-const verProducts = productoManager.getProducts();
-console.log(verProducts);
-
-
-const producto_1 = {
-  title: 'producto prueba',
-  description: 'Este es un producto prueba',
-  price: 200,
-  thumbnail: 'Sin imagen',
-  code: 'abc123',
-  stock: 25,
-};
-
-const addProducto1 = productoManager.addProduct(producto_1);
-console.log(addProducto1);
-console.log("Productos actuales:", productoManager.getProducts());
-
-const producto_2 = {
-  title: 'producto prueba',
-  description: 'Este es un producto prueba',
-  price: 200,
-  thumbnail: 'Sin imagen',
-  code: 'abc123',
-  stock: 25,
-};
-
-const addProducto2 = productoManager.addProduct(producto_2);
-console.log(addProducto2);
-
-const productoPorId = productoManager.getProducts()[0].id;
-
-const encontrarProducto = productoManager.getProductById(productoPorId);
-console.log(encontrarProducto);
-*/
